@@ -1,18 +1,18 @@
 # ai_insights.py
+import streamlit as st # <-- Make sure this is imported
 import google.generativeai as genai
-import streamlit as st
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-from database_setup import BuyingSignal, Company
+from database_setup import BuyingSignal
 
-# Configure the API with your key
+# Get the key from Streamlit's secure secrets manager
+# This line only works when the app is deployed on Streamlit
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+
+# Configure the API with the key we just got
 genai.configure(api_key=GOOGLE_API_KEY)
-# Initialize the model
-model = genai.GenerativeModel('gemini-2.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 
 def get_ai_recommendation(signal: BuyingSignal):
-    """
-    Generates a sales recommendation based on a buying signal using Google's Gemini Pro.
-    """
+    # ... (The rest of the file remains the same)
     prompt = f"""
     You are an expert B2B sales strategist named "AI Co-pilot". A prospect company has triggered a buying signal.
     Your task is to provide a concise, actionable recommendation for a sales development representative (SDR).
@@ -29,7 +29,6 @@ def get_ai_recommendation(signal: BuyingSignal):
     """
     try:
         response = model.generate_content(prompt)
-        # Check if the response has text, otherwise handle potential blocks
         return response.text.strip() if response.parts else f"⚠️ AI response was blocked. Reason: {response.prompt_feedback.block_reason.name}."
     except Exception as e:
         return f"❌ An error occurred while contacting the AI model: {e}"
