@@ -1,6 +1,7 @@
 # ai_insights.py
 import google.generativeai as genai
-from config import GOOGLE_API_KEY
+import streamlit as st
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 from database_setup import BuyingSignal, Company
 
 # Configure the API with your key
