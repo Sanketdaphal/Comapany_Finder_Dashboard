@@ -2,8 +2,8 @@
 
 This project is an interactive web application built with Streamlit that identifies and ranks companies based on real-time buying signals. It uses a custom scoring engine and a generative AI co-pilot (powered by Google's Gemini) to provide actionable sales insights.
 
-![Dashboard Screenshot](link_to_your_screenshot.png)
-*(Tip: Take a screenshot of your app, upload it to your GitHub repo, and link it here.)*
+![Dashboard Screenshot](https://github.com/Sanketdaphal/ai-buying-signals-dashboard/blob/main/image.png)
+ 
 
 ## ## Features
 
