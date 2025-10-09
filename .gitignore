@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 
 # Database
-data/app_database.db
+#data/app_database.db
 
 # Config file with secrets
 config.py
