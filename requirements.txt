@@ -1,0 +1,7 @@
+streamlit
+pandas
+SQLAlchemy
+Faker
+google-generativeai
+APScheduler
+streamlit-autorefresh
