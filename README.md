@@ -4,8 +4,11 @@ This project is an interactive web application built with Streamlit that identif
 
 ![Dashboard Screenshot](https://github.com/Sanketdaphal/ai-buying-signals-dashboard/blob/main/image.png)
 
-https://ai-buying-signals-dashboard-fa9mbntddjpifqvdwkya4p.streamlit.app/
+## 🚀 Live Demo
 
+**You can access the live, interactive dashboard here:**
+
+### [https://your-app-name.streamlit.app](https://your-app-name.streamlit.app)
 ## ## Features
 
 - **Real-Time Signal Feed:** A continuously updating, prioritized list of companies.
