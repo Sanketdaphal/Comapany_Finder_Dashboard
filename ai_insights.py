@@ -9,7 +9,7 @@ GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
 # Configure the API with the key we just got
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 def get_ai_recommendation(signal: BuyingSignal):
     # ... (The rest of the file remains the same)
