@@ -14,7 +14,7 @@ model = genai.GenerativeModel('gemini-2.5-flash')
 def get_ai_recommendation(signal: BuyingSignal):
     # ... (The rest of the file remains the same)
     prompt = f"""
-    You are an expert B2B sales strategist named "AI Co-pilot". A prospect company has triggered a buying signal.
+    You are an expert B2B sales strategist named "AlphaCapre". A prospect company has triggered a buying signal.
     Your task is to provide a concise, actionable recommendation for a sales development representative (SDR).
 
     **Company:** {signal.company.name}
