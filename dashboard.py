@@ -132,7 +132,11 @@ for company in scored_companies:
         # Changed 'st.session_-state' to 'st.session_state'
         # and removed the unnecessary 'in locals()' check.
         if insight_key in st.session_state:
+            info_box = st.info(f"**AI Strategy for {company['name']}**", icon="🧠")
             st.info(f"**AI Strategy for {company['name']}**", icon="🧠")
             st.markdown(st.session_state[insight_key])
+            if info_box.button("Hide Insight", key=f"hide_btn_{company['id']}"):
+                del st.session_state[insight_key]
+                st.rerun()
 
     st.markdown("<hr>", unsafe_allow_html=True)
