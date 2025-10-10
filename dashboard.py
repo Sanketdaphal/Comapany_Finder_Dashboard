@@ -1,34 +1,165 @@
-# ai_insights.py
-import google.generativeai as genai
-from config import GOOGLE_API_KEY
-from database_setup import BuyingSignal, Company
+# dashboard.py
+import streamlit as st
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from signal_engine import get_scored_companies
+from ai_insights import get_ai_recommendation
 
-# Configure the API with your key
-genai.configure(api_key=GOOGLE_API_KEY)
-# Initialize the model
-model = genai.GenerativeModel('gemini-2.5-flash')
+# --- Page Configuration & Database ---
+st.set_page_config(
+    page_title="AI Buying Signals Dashboard",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+engine = create_engine('sqlite:///data/app_database.db', connect_args={'check_same_thread': False})
+Session = sessionmaker(bind=engine)
+session = Session()
 
-def get_ai_recommendation(signal: BuyingSignal):
-    """
-    Generates a sales recommendation based on a buying signal using Google's Gemini Pro.
-    """
-    prompt = f"""
-    You are an expert B2B sales strategist named "AI Co-pilot". A prospect company has triggered a buying signal.
-    Your task is to provide a concise, actionable recommendation for a sales development representative (SDR).
+# --- Custom CSS for Dark Purple Theme ---
+st.markdown("""
+<style>
+    .stApp { background-color: #1E1E2E; color: #FFFFFF; }
+    h1 { color: #FFFFFF; }
+    .stMarkdown p { color: #FFFFFF; }
+    .header-row {
+        background-color: #1A1A2E;
+        padding: 3px 30px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #3A3A4A;
+        display: flex;
+        align-items: center;
+    }
+    .header-row .stMarkdown { flex-grow: 1; }
+    .header-row .stMarkdown p { margin: 0; }
+    .header-row .stMarkdown strong {
+        font-family: 'Verdana', sans-serif;
+        color: #C792EA; 
+        font-size: 1.1em;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stContainer {
+        border-radius: 8px;
+        border: 1px solid #3A3A4A;
+        padding: 15px 20px;
+        background-color: #43455C;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .stContainer:hover {
+        border-color: #C792EA;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border-top: 1px solid #3A3A4A;
+    }
+    .stButton > button {
+        background-image: linear-gradient(to right, #DA22FF 0%, #9733EE 51%, #DA22FF 100%);
+        background-size: 200% auto;
+        color: white;
+        border-radius: 6px;
+        border: none;
+        padding: 8px 15px;
+        font-weight: 600;
+        transition: 0.5s;
+    }
+    .stButton > button:hover {
+        background-position: right center;
+        transform: translateY(-1px);
+    }
+    .priority-score {
+        font-size: 2.2em;
+        font-weight: 800;
+        color: #FF6B6B;
+        text-shadow: 0 0 5px rgba(255,107,107,0.4);
+    }
+    .contact-icons img {
+        margin-right: 8px;
+        filter: grayscale(100%) brightness(180%);
+        transition: filter 0.2s ease-in-out;
+    }
+    .contact-icons img:hover {
+        filter: none;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-    **Company:** {signal.company.name}
-    **Industry:** {signal.company.industry}
-    **Signal Type:** {signal.signal_type}
-    **Signal Details:** "{signal.signal_data}"
 
-    Provide the following in a clear, brief format using Markdown:
-    1.  **Interpretation:** Why this signal matters for sales right now.
-    2.  **Actionable Advice:** The specific next step the SDR should take.
-    3.  **Email Hook:** A compelling opening sentence for a cold email that references this signal.
-    """
-    try:
-        response = model.generate_content(prompt)
-        # Check if the response has text, otherwise handle potential blocks
-        return response.text.strip() if response.parts else f"⚠️ AI response was blocked. Reason: {response.prompt_feedback.block_reason.name}."
-    except Exception as e:
-        return f"❌ An error occurred while contacting the AI model: {e}"
+# --- Main Dashboard Title ---
+st.title("🎯 AI Buying Signals Dashboard")
+st.markdown("A prioritized feed of companies showing strong buying intent. Select an industry to filter the list.")
+
+# --- Instant Single-Select Filter ---
+all_scored_companies = get_scored_companies()
+scored_companies = all_scored_companies
+
+if all_scored_companies:
+    industries = sorted(list(set([c['industry'] for c in all_scored_companies])))
+    filter_options = ["— Select an Industry to Filter —"] + industries
+    selected_industry = st.selectbox(
+        "", 
+        options=filter_options,
+        index=0
+    )
+    if selected_industry != "— Select an Industry to Filter —":
+        scored_companies = [
+            company for company in all_scored_companies if company['industry'] == selected_industry
+        ]
+
+st.markdown("---") 
+
+# --- Custom Table Header ---
+header_cols = st.columns([2, 1.5, 1.5, 2.5, 1, 1.5, 2, 1.5])
+st.markdown('<div class="header-row">', unsafe_allow_html=True)
+header_cols[0].markdown("<strong>Company</strong>", unsafe_allow_html=True)
+header_cols[1].markdown("<strong>Industry</strong>", unsafe_allow_html=True)
+header_cols[2].markdown("<strong>Location</strong>", unsafe_allow_html=True)
+header_cols[3].markdown("<strong>Latest Signal</strong>", unsafe_allow_html=True)
+header_cols[4].markdown("<strong>Score</strong>", unsafe_allow_html=True)
+header_cols[5].markdown("<strong>Contact</strong>", unsafe_allow_html=True)
+header_cols[6].markdown("<strong>Website</strong>", unsafe_allow_html=True)
+header_cols[7].markdown("<strong>AlphaCapre info</strong>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- Interactive Table Rows ---
+if not scored_companies:
+    st.warning("No companies match the selected filter or no signals have been detected.")
+
+for company in scored_companies:
+    with st.container():
+        cols = st.columns([2, 1.5, 1.5, 2.5, 1, 1.5, 2, 1.5])
+        
+        cols[0].markdown(f"**{company['name']}**")
+        cols[1].markdown(f"<span style='font-size: 0.9em; color: #FFFFFF;'>{company['industry']}</span>", unsafe_allow_html=True)
+        cols[2].caption(f"{company['location']}")
+        latest_signal = company['latest_signal_obj']
+        cols[3].markdown(f"**{latest_signal.signal_type.replace('_', ' ')}**")
+        cols[3].caption(f"{latest_signal.signal_data}")
+        cols[4].markdown(f"<span class='priority-score'>{company['priority_score']}</span>", unsafe_allow_html=True)
+        contact_md = []
+        if company.get('linkedin_url'):
+            contact_md.append(f"<a href='{company['linkedin_url']}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='24' title='LinkedIn'></a>")
+        if company.get('contact_phone'):
+            contact_md.append(f"<a href='tel:{company['contact_phone']}'><img src='https://cdn-icons-png.flaticon.com/512/5585/5585856.png' width='24' title='Call'></a>")
+        if company.get('contact_email'):
+            contact_md.append(f"<a href='mailto:{company['contact_email']}'><img src='https://cdn-icons-png.flaticon.com/512/732/732200.png' width='24' title='Email'></a>")
+        cols[5].markdown(f"<div class='contact-icons'>{' '.join(contact_md)}</div>", unsafe_allow_html=True)
+        cols[6].markdown(f"[{company['website'].replace('https://www.', '').replace('https://', '')}]({company['website']})")
+        
+        insight_key = f"ai_insight_{company['id']}"
+        if cols[7].button("Get Insight", key=f"ai_btn_{company['id']}"):
+            with st.spinner(f"AlphaCapre is analyzing {company['name']}..."):
+                st.session_state[insight_key] = get_ai_recommendation(latest_signal)
+        
+        if insight_key in st.session_state:
+            info_box = st.info(f"**AI Strategy for {company['name']}**")
+            st.markdown(st.session_state[insight_key])
+            if info_box.button("Hide Insight", key=f"hide_btn_{company['id']}"):
+                del st.session_state[insight_key]
+                st.rerun()
+
+    st.markdown("<hr>", unsafe_allow_html=True)
