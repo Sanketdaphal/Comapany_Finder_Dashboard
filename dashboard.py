@@ -3,111 +3,47 @@ import streamlit as st
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from signal_engine import get_scored_companies
-from ai_insights import get_ai_recommendation
+from ai_insights import get_initial_analysis, get_follow_up_response
 
-# --- Page Configuration & Database ---
-st.set_page_config(
-    page_title="AI Buying Signals Dashboard",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# --- Page Configuration & Initialize State ---
+st.set_page_config(page_title="AI Buying Signals Dashboard", layout="wide", initial_sidebar_state="collapsed")
+
+if "active_chat_company_id" not in st.session_state:
+    st.session_state.active_chat_company_id = None
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 engine = create_engine('sqlite:///data/app_database.db', connect_args={'check_same_thread': False})
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# --- Custom CSS for Dark Purple Theme ---
+# --- Custom CSS ---
 st.markdown("""
 <style>
-    .stApp { background-color: #1E1E2E; color: #FFFFFF; }
-    h1 { color: #FFFFFF; }
-    .stMarkdown p { color: #FFFFFF; }
-    .header-row {
-        background-color: #1A1A2E;
-        padding: 3px 30px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        border: 1px solid #3A3A4A;
-        display: flex;
-        align-items: center;
-    }
-    .header-row .stMarkdown { flex-grow: 1; }
-    .header-row .stMarkdown p { margin: 0; }
-    .header-row .stMarkdown strong {
-        font-family: 'Verdana', sans-serif;
-        color: #C792EA; 
-        font-size: 1.1em;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .stContainer {
-        border-radius: 8px;
-        border: 1px solid #3A3A4A;
-        padding: 15px 20px;
-        background-color: #43455C;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    .stContainer:hover {
-        border-color: #C792EA;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    }
-    hr {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        border-top: 1px solid #3A3A4A;
-    }
-    .stButton > button {
-        background-image: linear-gradient(to right, #DA22FF 0%, #9733EE 51%, #DA22FF 100%);
-        background-size: 200% auto;
-        color: white;
-        border-radius: 6px;
-        border: none;
-        padding: 8px 15px;
-        font-weight: 600;
-        transition: 0.5s;
-    }
-    .stButton > button:hover {
-        background-position: right center;
-        transform: translateY(-1px);
-    }
-    .priority-score {
-        font-size: 2.2em;
-        font-weight: 800;
-        color: #FF6B6B;
-        text-shadow: 0 0 5px rgba(255,107,107,0.4);
-    }
-    .contact-icons img {
-        margin-right: 8px;
-        filter: grayscale(100%) brightness(180%);
-        transition: filter 0.2s ease-in-out;
-    }
-    .contact-icons img:hover {
-        filter: none;
+    /* Your existing CSS goes here */
+
+    /* CSS for the scrollable chat expander */
+    div[data-testid="stExpanderDetails"] div[data-testid="stVerticalBlock"] {
+        max-height: 400px;
+        overflow-y: auto;
     }
 </style>
 """, unsafe_allow_html=True)
-
 
 # --- Main Dashboard Title ---
 st.title("🎯 AI Buying Signals Dashboard")
 st.markdown("A prioritized feed of companies showing strong buying intent. Select an industry to filter the list.")
 
-# --- Instant Single-Select Filter ---
+# --- Data Loading and Filtering ---
 all_scored_companies = get_scored_companies()
-scored_companies = all_scored_companies
+scored_companies = all_scored_companies 
 
 if all_scored_companies:
     industries = sorted(list(set([c['industry'] for c in all_scored_companies])))
     filter_options = ["— Select an Industry to Filter —"] + industries
-    selected_industry = st.selectbox(
-        "", 
-        options=filter_options,
-        index=0
-    )
+    selected_industry = st.selectbox("", options=filter_options, index=0)
     if selected_industry != "— Select an Industry to Filter —":
-        scored_companies = [
-            company for company in all_scored_companies if company['industry'] == selected_industry
-        ]
+        scored_companies = [c for c in all_scored_companies if c['industry'] == selected_industry]
 
 st.markdown("---") 
 
@@ -121,7 +57,7 @@ header_cols[3].markdown("<strong>Latest Signal</strong>", unsafe_allow_html=True
 header_cols[4].markdown("<strong>Score</strong>", unsafe_allow_html=True)
 header_cols[5].markdown("<strong>Contact</strong>", unsafe_allow_html=True)
 header_cols[6].markdown("<strong>Website</strong>", unsafe_allow_html=True)
-header_cols[7].markdown("<strong>AlphaCapre info</strong>", unsafe_allow_html=True)
+header_cols[7].markdown("<strong>Ask Miki</strong>", unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 
@@ -150,16 +86,48 @@ for company in scored_companies:
         cols[5].markdown(f"<div class='contact-icons'>{' '.join(contact_md)}</div>", unsafe_allow_html=True)
         cols[6].markdown(f"[{company['website'].replace('https://www.', '').replace('https://', '')}]({company['website']})")
         
-        insight_key = f"ai_insight_{company['id']}"
-        if cols[7].button("Get Insight", key=f"ai_btn_{company['id']}"):
-            with st.spinner(f"AlphaCapre is analyzing {company['name']}..."):
-                st.session_state[insight_key] = get_ai_recommendation(latest_signal)
+        if cols[7].button("Ask Miki", key=f"ai_btn_{company['id']}"):
+            if st.session_state.active_chat_company_id == company['id']:
+                st.session_state.active_chat_company_id = None
+                st.session_state.messages = []
+            else:
+                st.session_state.active_chat_company_id = company['id']
+                st.session_state.messages = [{"role": "assistant", "content": "Hi, I am Miki! Your AI-powered Chief of Staff. Click below to get my analysis of this signal."}]
+            st.rerun()
         
-        if insight_key in st.session_state:
-            info_box = st.info(f"**AI Strategy for {company['name']}**")
-            st.markdown(st.session_state[insight_key])
-            if info_box.button("Hide Insight", key=f"hide_btn_{company['id']}"):
-                del st.session_state[insight_key]
-                st.rerun()
+    # --- The Chat Window (Expander) ---
+    if st.session_state.active_chat_company_id == company['id']:
+        _, chat_col, _ = st.columns([1, 2, 1])
+        with chat_col:
+            with st.expander("Chat with Miki", expanded=True):
+                
+                # --- THIS IS THE CORRECTED AND FINAL CHAT LOGIC ---
+
+                # 1. Display all existing messages from the history
+                for message in st.session_state.messages:
+                    with st.chat_message(message["role"]):
+                        st.markdown(message["content"])
+                
+                # 2. Check if the LAST message was from the user, if so, get a response
+                if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+                    with st.chat_message("assistant"):
+                        with st.spinner("Miki is thinking..."):
+                            response = get_follow_up_response(st.session_state.messages, st.session_state.messages[-1]["content"])
+                            st.markdown(response)
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+
+                # 3. Handle the initial "Get Insights" button
+                if len(st.session_state.messages) == 1:
+                    if st.button("Get Actionable Insights", key=f"get_insight_{company['id']}"):
+                        with st.spinner("Miki is analyzing the signal..."):
+                            analysis = get_initial_analysis(latest_signal)
+                            st.session_state.messages.append({"role": "assistant", "content": analysis})
+                            st.rerun()
+                
+                # 4. Handle all follow-up questions
+                if prompt := st.chat_input("Ask a follow-up question..."):
+                    # When user types, just add their message to state and rerun
+                    st.session_state.messages.append({"role": "user", "content": prompt})
+                    st.rerun()
 
     st.markdown("<hr>", unsafe_allow_html=True)
