@@ -2,12 +2,8 @@
 import streamlit as st
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from streamlit_autorefresh import st_autorefresh
 from signal_engine import get_scored_companies
 from ai_insights import get_ai_recommendation
-from faker import Faker
-import random
-from datetime import datetime
 
 # --- Page Configuration & Database ---
 st.set_page_config(
@@ -18,9 +14,8 @@ st.set_page_config(
 engine = create_engine('sqlite:///data/app_database.db', connect_args={'check_same_thread': False})
 Session = sessionmaker(bind=engine)
 session = Session()
-fake = Faker()
 
-# --- Custom CSS (Your latest version) ---
+# --- Custom CSS for Dark Purple Theme ---
 st.markdown("""
 <style>
     .stApp { background-color: #1E1E2E; color: #FFFFFF; }
@@ -61,59 +56,44 @@ st.markdown("""
         margin-bottom: 1rem;
         border-top: 1px solid #3A3A4A;
     }
+    .stButton > button {
+        background-image: linear-gradient(to right, #DA22FF 0%, #9733EE 51%, #DA22FF 100%);
+        background-size: 200% auto;
+        color: white;
+        border-radius: 6px;
+        border: none;
+        padding: 8px 15px;
+        font-weight: 600;
+        transition: 0.5s;
+    }
+    .stButton > button:hover {
+        background-position: right center;
+        transform: translateY(-1px);
+    }
+    .priority-score {
+        font-size: 2.2em;
+        font-weight: 800;
+        color: #FF6B6B;
+        text-shadow: 0 0 5px rgba(255,107,107,0.4);
+    }
+    .contact-icons img {
+        margin-right: 8px;
+        filter: grayscale(100%) brightness(180%);
+        transition: filter 0.2s ease-in-out;
+    }
+    .contact-icons img:hover {
+        filter: none;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Data Management Functions ---
-def initialize_data():
-    """Loads initial data from the DB into session state, runs only once."""
-    if 'companies_data' not in st.session_state:
-        st.session_state.companies_data = get_scored_companies()
-
-def add_new_signal():
-    """Generates a new fake signal and adds it to the top of the in-memory list."""
-    if 'companies_data' in st.session_state and st.session_state.companies_data:
-        new_company_name = fake.company()
-        new_signal_options = {
-            'FUNDING': {'data': f"Raised ${random.randint(1, 20)}M Series {random.choice(['A', 'B', 'C'])}"},
-            'HIRING_SPREE': {'data': f"Hiring for {random.randint(5, 20)} new roles"}
-        }
-        sig_type, sig_info = random.choice(list(new_signal_options.items()))
-        
-        class FakeSignal:
-            def __init__(self, sig_type, sig_data):
-                self.signal_type = sig_type
-                self.signal_data = sig_data
-        
-        new_entry = {
-            "id": f"fake_{random.randint(1000, 9999)}",
-            "name": new_company_name,
-            "industry": random.choice(["FinTech SaaS", "AI/ML Platform"]),
-            "location": f"{fake.street_address()}, {fake.city()}",
-            "website": f"https://www.{fake.domain_name()}",
-            "linkedin_url": f"https://linkedin.com/company/{fake.slug()}",
-            "contact_phone": fake.phone_number(),
-            "contact_email": fake.email(),
-            "priority_score": random.randint(450, 600),
-            "latest_signal_obj": FakeSignal(sig_type, sig_info['data'])
-        }
-        st.session_state.companies_data.insert(0, new_entry)
-
-# --- Initialize Data & Start Auto-Refresh ---
-initialize_data()
-st_autorefresh(interval=20000, key="data_refresher")
-
-if 'initial_load' not in st.session_state:
-    st.session_state.initial_load = False
-else:
-    add_new_signal()
 
 # --- Main Dashboard Title ---
 st.title("🎯 AI Buying Signals Dashboard")
-st.markdown("A **live, simulated feed** of companies showing strong buying intent. New data is added every 20 seconds.")
+st.markdown("A prioritized feed of companies showing strong buying intent. Select an industry to filter the list.")
 
 # --- Instant Single-Select Filter ---
-all_scored_companies = st.session_state.get('companies_data', [])
+all_scored_companies = get_scored_companies()
 scored_companies = all_scored_companies
 
 if all_scored_companies:
@@ -175,12 +155,9 @@ for company in scored_companies:
             with st.spinner(f"AI Co-pilot is analyzing {company['name']}..."):
                 st.session_state[insight_key] = get_ai_recommendation(latest_signal)
         
-        # Corrected logic for showing and hiding the AI insight
         if insight_key in st.session_state:
             info_box = st.info(f"**AI Strategy for {company['name']}**", icon="🧠")
-            info_box.markdown(st.session_state[insight_key])
-            if info_box.button("Hide Insight", key=f"hide_btn_{company['id']}"):
-                del st.session_state[insight_key]
-                st.rerun()
+            st.markdown(st.session_state[insight_key])
+            
 
     st.markdown("<hr>", unsafe_allow_html=True)
