@@ -18,16 +18,13 @@ session = Session()
 # --- Custom CSS for Dark Purple Theme ---
 st.markdown("""
 <style>
-    /* ... (other styles remain the same) ... */
+    /* ... (CSS remains the same) ... */
     .stApp { background-color: #1E1E2E; color: #FFFFFF; }
     h1 { color: #FFFFFF; }
     .stMarkdown p { color: #FFFFFF; }
-    
-    /* === CSS FIX IS HERE === */
-    /* Padding was changed from 15px to 8px to make the header smaller */
     .header-row {
-        background-color: #FFFFFF1A1A2E; /* Slightly lighter background for header */
-        padding: 3px 30px; /* Reduced vertical padding */
+        background-color: #1A1A2E;
+        padding: 3px 30px;
         border-radius: 8px;
         margin-bottom: 15px;
         border: 1px solid #3A3A4A;
@@ -44,13 +41,11 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    /* === CSS FIX IS HERE === */
-    /* This background color was changed to a lighter purple-slate */
     .stContainer {
         border-radius: 8px;
         border: 1px solid #3A3A4A;
         padding: 15px 20px;
-        background-color: #43455C; /* Lighter background color */
+        background-color: #43455C;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
     .stContainer:hover {
@@ -62,7 +57,6 @@ st.markdown("""
         margin-bottom: 1rem;
         border-top: 1px solid #3A3A4A;
     }
-    /* ... (other styles remain the same) ... */
 </style>
 """, unsafe_allow_html=True)
 
@@ -91,10 +85,8 @@ if all_scored_companies:
 st.markdown("---") 
 
 # --- Custom Table Header ---
-
 header_cols = st.columns([2, 1.5, 1.5, 2.5, 1, 1.5, 2, 1.5])
 st.markdown('<div class="header-row">', unsafe_allow_html=True)
- 
 header_cols[0].markdown("<strong>Company</strong>", unsafe_allow_html=True)
 header_cols[1].markdown("<strong>Industry</strong>", unsafe_allow_html=True)
 header_cols[2].markdown("<strong>Location</strong>", unsafe_allow_html=True)
@@ -114,7 +106,6 @@ for company in scored_companies:
     with st.container():
         cols = st.columns([2, 1.5, 1.5, 2.5, 1, 1.5, 2, 1.5])
         
-        # ... (all the row-rendering code is the same) ...
         cols[0].markdown(f"**{company['name']}**")
         cols[1].markdown(f"<span style='font-size: 0.9em; color: #FFFFFF;'>{company['industry']}</span>", unsafe_allow_html=True)
         cols[2].caption(f"{company['location']}")
@@ -131,13 +122,16 @@ for company in scored_companies:
             contact_md.append(f"<a href='mailto:{company['contact_email']}'><img src='https://cdn-icons-png.flaticon.com/512/732/732200.png' width='24' title='Email'></a>")
         cols[5].markdown(f"<div class='contact-icons'>{' '.join(contact_md)}</div>", unsafe_allow_html=True)
         cols[6].markdown(f"[{company['website'].replace('https://www.', '').replace('https://', '')}]({company['website']})")
+        
         insight_key = f"ai_insight_{company['id']}"
         if cols[7].button("Get Insight", key=f"ai_btn_{company['id']}"):
             with st.spinner(f"AI Co-pilot is analyzing {company['name']}..."):
-                if 'st.session_state' not in locals():
-                    import streamlit as st
                 st.session_state[insight_key] = get_ai_recommendation(latest_signal)
-        if 'st.session_-state' in locals() and insight_key in st.session_state:
+        
+        # === THE FIX IS HERE ===
+        # Changed 'st.session_-state' to 'st.session_state'
+        # and removed the unnecessary 'in locals()' check.
+        if insight_key in st.session_state:
             st.info(f"**AI Strategy for {company['name']}**", icon="🧠")
             st.markdown(st.session_state[insight_key])
 
