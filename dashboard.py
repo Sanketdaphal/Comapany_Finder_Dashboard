@@ -156,7 +156,7 @@ for company in scored_companies:
                 st.session_state[insight_key] = get_ai_recommendation(latest_signal)
         
         if insight_key in st.session_state:
-            info_box = st.info(f"**AI Strategy for {company['name']}**", icon="🧠")
+            info_box = st.info(f"**AI Strategy for {company['name']}**")
             st.markdown(st.session_state[insight_key])
             
 
