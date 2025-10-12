@@ -5,3 +5,5 @@ Faker
 google-generativeai
 APScheduler
 streamlit-autorefresh
+yfinance
+google-api-python-client

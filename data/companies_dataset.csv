@@ -1,0 +1,30 @@
+name,domain,year_found,industry,size_range,locality,country,linkedin_url,current_emp,total_employee_estimate,ticker_symbol
+ibm,ibm.com,1911,information technology and services,10001+,new york,united states,linkedin.com/company/ibm,274047,716906,IBM
+tata consultancy services,tcs.com,1968,information technology and services,10001+,bombay,india,linkedin.com/company/tata-consultancy-services,190771,341369,TCS.NS
+accenture,accenture.com,1989,information technology and services,10001+,dublin,ireland,linkedin.com/company/accenture,190689,455768,ACN
+us army,goarmy.com,1800,military,10001+,alexandria,united states,linkedin.com/company/us-army,,
+ey,ey.com,1989,accounting,10001+,london,great britain,linkedin.com/company/ey,,
+hewlett-packard enterprise,hpe.com,1939,information technology and services,10001+,palo alto,united states,linkedin.com/company/hewlett-packard-enterprise,127952,412952,HPE
+cognizant,cognizant.com,1994,information technology and services,10001+,teaneck,united states,linkedin.com/company/cognizant,120753,272827,CTSH
+walmart,walmart.com,1962,retail,10001+,withee,united states,linkedin.com/company/walmart,120753,272827,WMT
+microsoft,microsoft.com,1975,computer software,10001+,redmond,united states,linkedin.com/company/microsoft,116196,276983,MSFT
+at&t,att.com,1876,telecommunications,10001+,dallas,united states,linkedin.com/company/at&t,115188,269659,T
+united states air force,af.mil,1947,defense & space,10001+,randolph,united states,linkedin.com/company/united-states-air-force,113997,316549,
+pwc,pwc.com,1998,accounting,10001+,new york,united states,linkedin.com/company/pwc,111372,379447,
+wells fargo,wellsfargo.com,1981,financial services,10001+,san francisco,united states,linkedin.com/company/wells-fargo,109532,264101,WFC
+infosys,infosys.com,1981,information technology and services,10001+,bangalore,india,linkedin.com/company/infosys,104752,215718,INFY
+deloitte,deloitte.com,1900,management consulting,10001+,new york,united states,linkedin.com/company/deloitte,104112,329145,
+citigroup,citigroup.com,1812,financial services,10001+,new york,united states,linkedin.com/company/citigroup,101482,298171,C
+bank of america,bankofamerica.com,1968,banking,10001+,charlotte,united states,linkedin.com/company/bank-of-america,97357,279769,BAC
+jpmorgan chase & co.,jpmorganchase.com,1823,financial services,10001+,new york,united states,linkedin.com/company/jpmorgan-chase,95234,242135,JPM
+us navy,navy.com,1994,military,10001+,washington,united states,linkedin.com/company/us-navy,94458,325740,
+amazon,amazon.com,1994,internet,10001+,seattle,united states,linkedin.com/company/amazon,93247,161866,AMZN
+apple,apple.com,1976,consumer electronics,10001+,cupertino,united states,linkedin.com/company/apple,90095,179531,AAPL
+siemens,siemens.com,1847,electrical/electronic manufacturing,10001+,munich,germany,linkedin.com/company/siemens,87381,240538,SIE.DE
+oracle,oracle.com,1977,information technology and services,10001+,redwood shores,united states,linkedin.com/company/oracle,85090,206211,ORCL
+nokia,nokia.com,1865,telecommunications,10001+,espoo,finland,linkedin.com/company/nokia,84327,251795,NOK
+education.gov.fr,education.gouv.fr,1808,public policy,10001+,paris,france,linkedin.com/company/education.gouv.fr,84218,101083,
+capgemini,capgemini.com,1967,information technology and services,10001+,france,france,linkedin.com/company/capgemini,84179,203525,
+wipro limited,wipro.com,1945,information technology and services,10001+,bangalore,india,linkedin.com/company/wipro,78261,177368,WIPRO.NS
+hsbc,hsbc.com,1865,financial services,10001+,london,great britain,linkedin.com/company/hsbc,75640,225649,HSBC
+google,google.com,1998,internet,10001+,mountain view,united states,linkedin.com/company/google,75109,131549,GOOGL

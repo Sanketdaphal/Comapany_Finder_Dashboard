@@ -11,3 +11,5 @@ config.py
 
 # VSCode settings
 .vscode/
+
+.streamlit/secrets.toml

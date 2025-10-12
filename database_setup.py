@@ -18,6 +18,8 @@ class Company(Base):
 
     phone = Column(String)
     website = Column(String) 
+    ticker_symbol = Column(String)
+    notes = Column(Text, default="")
     
     signals = relationship("BuyingSignal", back_populates="company", cascade="all, delete-orphan")
     contacts = relationship("Contact", back_populates="company", cascade="all, delete-orphan")
