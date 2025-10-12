@@ -46,6 +46,8 @@ def get_scored_companies():
                 "location": company.location,
                 "website": company.website,
                 "linkedin_url": company.linkedin_url, # Pass linkedin url
+                "ticker_symbol": company.ticker_symbol,
+                "notes": company.notes,
                 "contact_phone": first_contact.phone if first_contact else None, # Pass contact phone
                 "contact_email": first_contact.email if first_contact else None, # Pass contact email
                 "priority_score": round(total_score),
