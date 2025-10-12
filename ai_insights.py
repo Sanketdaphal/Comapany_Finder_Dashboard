@@ -8,7 +8,7 @@ try:
     GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=GOOGLE_API_KEY)
     # Using a capable model for these tasks
-    model = genai.GenerativeModel('gemini-1.5-flash') # Corrected from 2.5 to 1.5 for wider availability
+    model = genai.GenerativeModel('gemini-2.5-flash') # Corrected from 2.5 to 1.5 for wider availability
 except (KeyError, AttributeError):
     st.error("Google API Key not found. Please set it in your Streamlit secrets.")
     model = None
