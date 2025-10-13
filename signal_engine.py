@@ -2,20 +2,28 @@
 import streamlit as st
 from datetime import datetime
 from sqlalchemy.orm import joinedload
-from database_setup import Company
+from database_setup import Company, Base # Import Base
 
-# Use Streamlit's built-in SQL connection for persistence
-conn = st.connection("sql")
+# --- Use Streamlit's built-in SQL connection, explicitly setting the dialect ---
+conn = st.connection("sql", dialect="sqlite")
 
 def get_scored_companies():
     """
     Fetches all companies with their signals and contacts, and calculates a priority score.
     """
-    with conn.session as session:
-        companies = session.query(Company).options(
-            joinedload(Company.signals),
-            joinedload(Company.contacts) 
-        ).all()
+    try:
+        with conn.session as session:
+            # Create tables if they don't exist
+            Base.metadata.create_all(session.bind)
+            
+            companies = session.query(Company).options(
+                joinedload(Company.signals),
+                joinedload(Company.contacts) 
+            ).all()
+    except Exception as e:
+        st.error(f"Error connecting to the database: {e}")
+        st.info("If this is the first run, please use the Admin Panel in the sidebar to seed the database.")
+        return [] # Return an empty list to prevent crashing
     
     scored_companies = []
 
