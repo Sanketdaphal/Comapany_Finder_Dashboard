@@ -189,14 +189,17 @@ for company in scored_companies:
                         label_visibility="collapsed"
                     )
                     if st.button("Save Note", key=f"save_note_{company['id']}", type="primary"):
-                        company_to_update = session.query(Company).filter(Company.id == company['id']).first()
-                        if company_to_update:
-                            company_to_update.notes = note_content
-                            session.commit()
-                            st.session_state.active_note_company_id = None # Close notepad on save
-                            st.toast(f"Note for {company['name']} saved!", icon="✅")
-                            time.sleep(1)
-                            st.rerun()
+                        # --- MODIFIED SAVE LOGIC ---
+                        with conn.session as session:
+                            company_to_update = session.query(Company).filter(Company.id == company['id']).first()
+                            if company_to_update:
+                                company_to_update.notes = note_content
+                                session.commit()
+                        # --- END OF MODIFICATION ---
+                        st.session_state.active_note_company_id = None # Close notepad on save
+                        st.toast(f"Note for {company['name']} saved!", icon="✅")
+                        time.sleep(1)
+                        st.rerun()
         
         # The Chat Expander
         if st.session_state.active_chat_company_id == company['id']:
