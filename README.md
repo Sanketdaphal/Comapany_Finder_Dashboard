@@ -1,61 +1,61 @@
-# 🎯 AI Buying Signals Dashboard
+# Company Finder Dashboard
 
-This project is an interactive web application built with Streamlit that identifies and ranks companies based on real-time buying signals. It uses a custom scoring engine and a generative AI co-pilot (powered by Google's Gemini) to provide actionable sales insights.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.25%2B-red.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-![Dashboard Screenshot](https://github.com/Sanketdaphal/ai-buying-signals-dashboard/blob/main/image.png)
+An advanced sales intelligence platform that transforms raw company data into a prioritized, actionable feed. This tool leverages AI to provide deep strategic insights, generate outreach content, and integrate real-time financial and news data, all within a clean, interactive user interface.
+
+---
 
 ## 🚀 Live Demo
 
-**You can access the live, interactive dashboard here:**
+**[>> Access the live application here <<](https://ai-buying-signals-dashboard-guovm6evzxexnwxnmxmekh.streamlit.app/)**
 
-### [https://your-app-name.streamlit.app](https://your-app-name.streamlit.app)
-## ## Features
+ 
 
-- **Real-Time Signal Feed:** A continuously updating, prioritized list of companies.
-- **Dynamic Priority Scoring:** Ranks companies based on signal intensity, recency, and type.
-- **Interactive UI:** A clean, modern interface for viewing company and signal data.
-- **AI Co-pilot:** On-demand, AI-generated sales strategies for any company in the feed.
-- **Custom Theming:** Supports both light and dark modes with custom CSS.
+---
 
-## ## Tech Stack
+## 📸 Application Preview
 
-- **Frontend:** Streamlit
-- **Backend/Logic:** Python, SQLAlchemy, APScheduler
-- **Database:** SQLite
-- **AI:** Google Gemini API
-- **Data Simulation:** Faker
+![AI Buying Signals Dashboard Screenshot](Image.png)
+ 
 
-## ## Setup and Installation
+---
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/YourUsername/your-repo-name.git](https://github.com/YourUsername/your-repo-name.git)
-    cd your-repo-name
-    ```
+## ✨ Key Features
+ 
+### 🤖 AI Co-Pilot ("Miki")
+An interactive chatbot designed to be a sales strategist. The interface provides one-click actions and a conversational text input for custom queries.
+* **Actionable Insights:** Generates a full strategic plan, including likely pain points, key personas to target, and a core value proposition.
+* **AI Email Writer:** Drafts a complete, personalized, and ready-to-send cold outreach email.
+* **Live News Feed:** Fetches and summarizes the top 3 latest news articles for any company using a live Google Search.
+* **Follow-up Q&A:** Allows for multi-turn, context-aware conversations to refine strategy and ask specific questions.
 
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
+### 💹 Integrated Financial Intelligence
+* For publicly traded companies, the dashboard displays key stock market data directly in the company row.
+* Metrics include current stock price, P/E ratio, market capitalization, and the 5-Year Compound Annual Growth Rate (CAGR).
+* Data is fetched from Yahoo Finance and cached to ensure a responsive UI.
 
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+### 🗒️ Persistent User Notes
+* A built-in notepad for every company allows users to add, view, and save their own qualitative insights.
+* The button dynamically changes to show whether a note already exists.
+* Notes are saved persistently in the database, creating a system of record.
 
-4.  **Set up your API Key:**
-    - Rename the `config.py.template` file to `config.py`.
-    - Open `config.py` and paste your Google AI API key.
-    *(Note: You will need to create a `config.py.template` file for this step, which is good practice. Your actual `config.py` is ignored by git.)*
+### 🖥️ Interactive & Responsive UI
+* Built with Streamlit, the UI is clean, modern, and easy to navigate.
+* Features an industry filter to instantly narrow down the list of companies.
+* Includes quick-access icons for LinkedIn, email, and phone, plus a direct link to the company website.
 
-5.  **Initialize the database:**
-    ```bash
-    python database_setup.py
-    python data_seeder.py
-    ```
+---
 
-6.  **Run the application:**
-    ```bash
-    streamlit run dashboard.py
-    ```
+## 🛠️ Technology Stack
+
+* **Frontend:** Streamlit
+* **Backend:** Python 3.9+
+* **Database:** SQLite + SQLAlchemy ORM
+* **AI & Data APIs:**
+    * Google Gemini API (for AI strategy & text generation)
+    * Google Custom Search API (for live news)
+    * `yfinance` (for stock market data)
+* **Data Seeding:** Pandas, Faker
