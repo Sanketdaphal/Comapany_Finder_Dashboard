@@ -59,3 +59,95 @@ An interactive chatbot designed to be a sales strategist. The interface provides
     * Google Custom Search API (for live news)
     * `yfinance` (for stock market data)
 * **Data Seeding:** Pandas, Faker
+
+* ## ⚙️ Setup and Installation
+
+Follow these steps to get the dashboard running on your local machine.
+
+---
+
+### 1. Prerequisites
+
+* Python 3.8+
+* Git
+
+---
+
+### 2. Clone the Repository
+
+
+git clone <your-repository-url>
+cd <repository-name>
+
+. Set Up a Virtual Environment
+It's recommended to use a virtual environment to manage dependencies.
+
+Windows:
+
+Bash
+
+python -m venv venv
+.\venv\Scripts\activate
+macOS / Linux:
+
+Bash
+
+python3 -m venv venv
+source venv/bin/activate
+
+4. Install Dependencies
+Install all the required Python packages from the requirements.txt file.
+
+Bash
+
+pip install -r requirements.txt
+5. Configure API Keys
+The application uses Google's Custom Search API to fetch news. You'll need to create a secrets file for your API keys.
+
+Create a new directory in the root of the project:
+
+Bash
+
+mkdir .streamlit
+Create a secrets file inside this new directory:
+
+Bash
+
+touch .streamlit/secrets.toml
+Add your Google API Key and Search Engine ID to the secrets.toml file. You can get these credentials from the Google Cloud Console and the Programmable Search Engine control panel.
+
+Ini, TOML
+
+# .streamlit/secrets.toml
+GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY_HERE"
+SEARCH_ENGINE_ID = "YOUR_SEARCH_ENGINE_ID_HERE"
+
+# Note: If using a Generative AI model like Gemini, add its key here too.
+# GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
+6. Prepare the Company Dataset
+The application seeds its initial data from a CSV file.
+
+Ensure you have a data directory in the root of the project.
+
+Create a CSV file named companies_dataset.csv inside the data directory (data/companies_dataset.csv).
+
+ 
+Export to Sheets
+Note: For private companies, leave the ticker_symbol column empty.
+
+7. Initialize the Database and Seed Data
+Run the following scripts from your terminal in order.
+
+Set up the database schema:
+
+Bash
+
+python database_setup.py
+This will create an app_database.db file in the data directory.
+
+Seed the database with initial data:
+
+Bash
+
+python data_seeder.py
+This will read your companies_dataset.csv, populate the database, and generate random buying signals for the companies.
