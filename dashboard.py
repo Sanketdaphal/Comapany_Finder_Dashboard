@@ -112,9 +112,10 @@ for company in scored_companies:
         if stock_data:
             stock_info_html = f"""
             <div style="font-size: 0.9em;">
-                <span><strong>Price:</strong> {stock_data['Price']}</span> | 
-                <span><strong>P/E:</strong> {stock_data['P/E Ratio']}</span><br>
-                <span title="Market Capitalization"><strong>M. Cap:</strong> {stock_data['Market Cap']}</span>
+                <span><strong>Price:</strong> {stock_data.get('Price', 'N/A')}</span> | 
+                <span><strong>P/E:</strong> {stock_data.get('P/E Ratio', 'N/A')}</span><br>
+                <span title="Market Capitalization"><strong>M. Cap:</strong> {stock_data.get('Market Cap', 'N/A')}</span> | 
+                <span title="5-Year Compound Annual Growth Rate"><strong>CAGR:</strong> {stock_data.get('CAGR (5Y)', 'N/A')}</span>
             </div>
             """
             cols[3].markdown(stock_info_html, unsafe_allow_html=True)
