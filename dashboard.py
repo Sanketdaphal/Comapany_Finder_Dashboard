@@ -5,22 +5,20 @@ from sqlalchemy import create_engine
 import pandas as pd
 import time
 from signal_engine import get_scored_companies
-from ai_insights import (get_initial_analysis, get_follow_up_response, 
-                         generate_outreach_email) 
+from ai_insights import (get_initial_analysis, get_follow_up_response,
+                         generate_outreach_email)
 from database_setup import Company
 from stock_info import get_stock_data
 from google_search import get_latest_news_from_google
 
 # --- Page Configuration & Initialize State ---
-st.set_page_config(page_title="AI Buying Signals Dashboard", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Company Finder", layout="wide", initial_sidebar_state="collapsed")
 
-# State for Miki Chat
+# (Session state initialization is unchanged)
 if "active_chat_company_id" not in st.session_state:
     st.session_state.active_chat_company_id = None
 if "chat_histories" not in st.session_state:
     st.session_state.chat_histories = {}
-
-# State for the Notes feature
 if "active_note_company_id" not in st.session_state:
     st.session_state.active_note_company_id = None
 
@@ -33,19 +31,36 @@ st.markdown("""
 <style>
     /* Main page styling */
     .stApp {
-        background-color: #0E1117;
-        color: #FAFAFA;
+        background-color: #111827;
+        color: #F9FAFB;
     }
-    /* Header row for the custom table */
+
+    /* --- UPDATED HEADER ROW STYLE --- */
     .header-row {
+        display: flex;
+        align-items: center;
         font-weight: bold;
-        color: #1DB954;
-        padding-bottom: 10px;
+        background-color: #1F2937;
+        color: #E5E7EB;
+        padding: 12px 0px;
+        border-radius: 8px;
+        margin-bottom: 20px; /* Increased this value for more space */
+        border-bottom: 1px solid #4B5563;
     }
+    .header-item {
+        text-align: left;
+        padding: 0 10px;
+    }
+    /* Use flex property to mimic st.columns ratios */
+    .w-2 { flex: 2; }
+    .w-1-5 { flex: 1.5; }
+    .w-3 { flex: 3; }
+    /* --- END OF UPDATED STYLE --- */
+
     /* Contact icons container */
     .contact-icons {
         display: flex;
-        gap: 15px; /* space between icons */
+        gap: 15px;
         align-items: center;
     }
     .contact-icons img {
@@ -58,6 +73,7 @@ st.markdown("""
     div[data-testid="stExpander"] div[role="button"] p {
         font-size: 1.1em;
         font-weight: bold;
+        color: #3B82F6;
     }
     /* CSS for the scrollable chat expander */
     div[data-testid="stExpanderDetails"] div[data-testid="stVerticalBlock"] {
@@ -68,11 +84,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Main Dashboard Title & Filtering ---
-st.title("AI Buying Signals Dashboard")
+st.title("Company Finder")
 st.markdown("A prioritized feed of companies showing strong buying intent. Select an industry to filter the list.")
 
 all_scored_companies = get_scored_companies()
-scored_companies = all_scored_companies 
+scored_companies = all_scored_companies
 
 if all_scored_companies:
     industries = sorted(list(set([c['industry'] for c in all_scored_companies])))
@@ -81,20 +97,21 @@ if all_scored_companies:
     if selected_industry != "— Select an Industry to Filter —":
         scored_companies = [c for c in all_scored_companies if c['industry'] == selected_industry]
 
-st.markdown("---") 
+# --- NEW: HTML-BASED HEADER TO REPLACE st.columns ---
+st.markdown("""
+<div class="header-row">
+    <div class="header-item w-2"><strong>Company</strong></div>
+    <div class="header-item w-1-5"><strong>Industry</strong></div>
+    <div class="header-item w-1-5"><strong>Location</strong></div>
+    <div class="header-item w-3"><strong>Stock Market Info</strong></div>
+    <div class="header-item w-1-5"><strong>Notes</strong></div>
+    <div class="header-item w-1-5"><strong>Contact</strong></div>
+    <div class="header-item w-2"><strong>Website</strong></div>
+    <div class="header-item w-1-5"><strong>Ask Miki</strong></div>
+</div>
+""", unsafe_allow_html=True)
+# --- END OF NEW HEADER ---
 
-# --- Custom Table Header ---
-header_cols = st.columns([2, 1.5, 1.5, 3, 1.5, 1.5, 2, 1.5])
-st.markdown('<div class="header-row">', unsafe_allow_html=True)
-header_cols[0].markdown("<strong>Company</strong>", unsafe_allow_html=True)
-header_cols[1].markdown("<strong>Industry</strong>", unsafe_allow_html=True)
-header_cols[2].markdown("<strong>Location</strong>", unsafe_allow_html=True)
-header_cols[3].markdown("<strong>Stock Market Info</strong>", unsafe_allow_html=True)
-header_cols[4].markdown("<strong>Notes</strong>", unsafe_allow_html=True)
-header_cols[5].markdown("<strong>Contact</strong>", unsafe_allow_html=True)
-header_cols[6].markdown("<strong>Website</strong>", unsafe_allow_html=True)
-header_cols[7].markdown("<strong>Ask Miki</strong>", unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Interactive Table Rows ---
 if not scored_companies:
@@ -102,19 +119,21 @@ if not scored_companies:
 
 for company in scored_companies:
     with st.container():
+        # This columns call now only affects the data rows, not the header
         cols = st.columns([2, 1.5, 1.5, 3, 1.5, 1.5, 2, 1.5])
         
         # Display main row data
         cols[0].markdown(f"**{company['name']}**")
-        cols[1].markdown(f"<span style='font-size: 0.9em; color: #FFFFFF;'>{company['industry']}</span>", unsafe_allow_html=True)
+        cols[1].markdown(f"<span style='font-size: 0.9em;'>{company['industry']}</span>", unsafe_allow_html=True)
         cols[2].caption(f"{company['location']}")
+        
         stock_data = get_stock_data(company.get('ticker_symbol'))
         if stock_data:
             stock_info_html = f"""
             <div style="font-size: 0.9em;">
-                <span><strong>Price:</strong> {stock_data.get('Price', 'N/A')}</span> | 
+                <span><strong>Price:</strong> {stock_data.get('Price', 'N/A')}</span> |
                 <span><strong>P/E:</strong> {stock_data.get('P/E Ratio', 'N/A')}</span><br>
-                <span title="Market Capitalization"><strong>M. Cap:</strong> {stock_data.get('Market Cap', 'N/A')}</span> | 
+                <span title="Market Capitalization"><strong>M. Cap:</strong> {stock_data.get('Market Cap', 'N/A')}</span> |
                 <span title="5-Year Compound Annual Growth Rate"><strong>CAGR:</strong> {stock_data.get('CAGR (5Y)', 'N/A')}</span>
             </div>
             """
