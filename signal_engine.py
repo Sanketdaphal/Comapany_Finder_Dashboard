@@ -1,21 +1,17 @@
- # signal_engine.py
+# signal_engine.py
+import streamlit as st
 from datetime import datetime
-from sqlalchemy.orm import sessionmaker, joinedload
-from sqlalchemy import create_engine
+from sqlalchemy.orm import joinedload
 from database_setup import Company
 
-# Database connection
-engine = create_engine('sqlite:///data/app_database.db')
-Session = sessionmaker(bind=engine)
-session = Session()
+# Use Streamlit's built-in SQL connection for persistence
+conn = st.connection("sql")
 
 def get_scored_companies():
     """
     Fetches all companies with their signals and contacts, and calculates a priority score.
     """
- 
-    # We now also load the 'contacts' relationship to get phone/email
-     with conn.session as session:
+    with conn.session as session:
         companies = session.query(Company).options(
             joinedload(Company.signals),
             joinedload(Company.contacts) 
@@ -37,8 +33,6 @@ def get_scored_companies():
         
         if total_score > 0:
             latest_signal = max(company.signals, key=lambda s: s.timestamp)
-            
-            # Get the first contact's details, if they exist
             first_contact = company.contacts[0] if company.contacts else None
 
             scored_companies.append({
@@ -47,14 +41,13 @@ def get_scored_companies():
                 "industry": company.industry,
                 "location": company.location,
                 "website": company.website,
-                "linkedin_url": company.linkedin_url, # Pass linkedin url
+                "linkedin_url": company.linkedin_url,
                 "ticker_symbol": company.ticker_symbol,
                 "notes": company.notes,
-                "contact_phone": first_contact.phone if first_contact else None, # Pass contact phone
-                "contact_email": first_contact.email if first_contact else None, # Pass contact email
+                "contact_phone": first_contact.phone if first_contact else None,
+                "contact_email": first_contact.email if first_contact else None,
                 "priority_score": round(total_score),
                 "latest_signal_obj": latest_signal
             })
             
-    # Sort by the highest score first
     return sorted(scored_companies, key=lambda c: c['priority_score'], reverse=True)
