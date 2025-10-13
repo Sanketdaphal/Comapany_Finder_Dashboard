@@ -243,7 +243,7 @@ for company in scored_companies:
                             st.markdown(prompt)
                         
                         with st.chat_message("assistant"):
-                            with st.spinner("Miki is thinking..."):
+                            with st.spinner("Mivi is thinking..."):
                                 response = get_follow_up_response(active_chat_history, prompt)
                                 st.markdown(response)
                         active_chat_history.append({"role": "assistant", "content": response})
