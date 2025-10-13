@@ -13,11 +13,13 @@ def get_scored_companies():
     """
     Fetches all companies with their signals and contacts, and calculates a priority score.
     """
+ 
     # We now also load the 'contacts' relationship to get phone/email
-    companies = session.query(Company).options(
-        joinedload(Company.signals),
-        joinedload(Company.contacts) 
-    ).all()
+     with conn.session as session:
+        companies = session.query(Company).options(
+            joinedload(Company.signals),
+            joinedload(Company.contacts) 
+        ).all()
     
     scored_companies = []
 
