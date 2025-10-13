@@ -253,3 +253,20 @@ for company in scored_companies:
                         st.rerun()
 
         st.markdown("<hr>", unsafe_allow_html=True)
+
+
+# --- Admin Section for Seeding ---
+with st.sidebar:
+    st.title("⚙️ Admin Panel")
+    admin_password = st.text_input("Enter Admin Password", type="password")
+
+    # Check if the entered password matches the one in secrets
+    if admin_password == st.secrets.get("ADMIN_PASSWORD"):
+        st.success("Authenticated")
+        if st.button("SEED DATABASE"):
+            from data_seeder import seed_initial_data
+            with st.spinner("Populating the database with initial data..."):
+                seed_initial_data()
+            st.success("✅ Database seeded successfully!")
+            st.info("You can now remove the admin section from the code.")
+            st.rerun()
