@@ -7,3 +7,4 @@ APScheduler
 streamlit-autorefresh
 yfinance
 google-api-python-client
+st-sqlite-connection
