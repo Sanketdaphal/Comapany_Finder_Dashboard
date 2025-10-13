@@ -1,20 +1,19 @@
 # dashboard.py
 import streamlit as st
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 import pandas as pd
 import time
 from signal_engine import get_scored_companies
-from ai_insights import (get_initial_analysis, get_follow_up_response,
-                         generate_outreach_email)
-from database_setup import Company
+from ai_insights import (get_initial_analysis, get_follow_up_response, 
+                         generate_outreach_email) 
+from database_setup import Company, Base
 from stock_info import get_stock_data
 from google_search import get_latest_news_from_google
+from sqlalchemy.orm import sessionmaker
 
 # --- Page Configuration & Initialize State ---
-st.set_page_config(page_title="Company Finder", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="SignalStream Intelligence", layout="wide", initial_sidebar_state="collapsed")
 
-# (Session state initialization is unchanged)
+# Session state initialization
 if "active_chat_company_id" not in st.session_state:
     st.session_state.active_chat_company_id = None
 if "chat_histories" not in st.session_state:
@@ -22,9 +21,8 @@ if "chat_histories" not in st.session_state:
 if "active_note_company_id" not in st.session_state:
     st.session_state.active_note_company_id = None
 
-engine = create_engine('sqlite:///data/app_database.db', connect_args={'check_same_thread': False})
-Session = sessionmaker(bind=engine)
-session = Session()
+# --- Use Streamlit's built-in SQL connection, explicitly setting the dialect ---
+conn = st.connection("sql", dialect="sqlite")
 
 # --- Custom CSS ---
 st.markdown("""
@@ -34,8 +32,6 @@ st.markdown("""
         background-color: #111827;
         color: #F9FAFB;
     }
-
-    /* --- UPDATED HEADER ROW STYLE --- */
     .header-row {
         display: flex;
         align-items: center;
@@ -44,20 +40,16 @@ st.markdown("""
         color: #E5E7EB;
         padding: 12px 0px;
         border-radius: 8px;
-        margin-bottom: 20px; /* Increased this value for more space */
+        margin-bottom: 20px;
         border-bottom: 1px solid #4B5563;
     }
     .header-item {
         text-align: left;
         padding: 0 10px;
     }
-    /* Use flex property to mimic st.columns ratios */
     .w-2 { flex: 2; }
     .w-1-5 { flex: 1.5; }
     .w-3 { flex: 3; }
-    /* --- END OF UPDATED STYLE --- */
-
-    /* Contact icons container */
     .contact-icons {
         display: flex;
         gap: 15px;
@@ -69,13 +61,11 @@ st.markdown("""
     .contact-icons img:hover {
         transform: scale(1.2);
     }
-    /* Styling for the chat window */
     div[data-testid="stExpander"] div[role="button"] p {
         font-size: 1.1em;
         font-weight: bold;
         color: #3B82F6;
     }
-    /* CSS for the scrollable chat expander */
     div[data-testid="stExpanderDetails"] div[data-testid="stVerticalBlock"] {
         max-height: 400px;
         overflow-y: auto;
@@ -88,7 +78,7 @@ st.title("Company Finder")
 st.markdown("A prioritized feed of companies showing strong buying intent. Select an industry to filter the list.")
 
 all_scored_companies = get_scored_companies()
-scored_companies = all_scored_companies
+scored_companies = all_scored_companies 
 
 if all_scored_companies:
     industries = sorted(list(set([c['industry'] for c in all_scored_companies])))
@@ -97,7 +87,7 @@ if all_scored_companies:
     if selected_industry != "— Select an Industry to Filter —":
         scored_companies = [c for c in all_scored_companies if c['industry'] == selected_industry]
 
-# --- NEW: HTML-BASED HEADER TO REPLACE st.columns ---
+# --- HTML-BASED HEADER ---
 st.markdown("""
 <div class="header-row">
     <div class="header-item w-2"><strong>Company</strong></div>
@@ -110,8 +100,6 @@ st.markdown("""
     <div class="header-item w-1-5"><strong>Ask Miki</strong></div>
 </div>
 """, unsafe_allow_html=True)
-# --- END OF NEW HEADER ---
-
 
 # --- Interactive Table Rows ---
 if not scored_companies:
@@ -119,10 +107,8 @@ if not scored_companies:
 
 for company in scored_companies:
     with st.container():
-        # This columns call now only affects the data rows, not the header
         cols = st.columns([2, 1.5, 1.5, 3, 1.5, 1.5, 2, 1.5])
         
-        # Display main row data
         cols[0].markdown(f"**{company['name']}**")
         cols[1].markdown(f"<span style='font-size: 0.9em;'>{company['industry']}</span>", unsafe_allow_html=True)
         cols[2].caption(f"{company['location']}")
@@ -141,7 +127,6 @@ for company in scored_companies:
         else:
             cols[3].caption("Not Publicly Traded")
 
-        # --- Notes Button Logic ---
         with cols[4]:
             note_exists = company.get('notes', '').strip() != ''
             button_type = "primary" if note_exists else "secondary"
@@ -154,7 +139,6 @@ for company in scored_companies:
                     st.session_state.active_note_company_id = company['id']
                 st.rerun()
 
-        # Contact, Website, and Miki Button
         contact_md = []
         if company.get('linkedin_url'):
             contact_md.append(f"<a href='{company['linkedin_url']}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='24' title='LinkedIn'></a>")
@@ -175,7 +159,6 @@ for company in scored_companies:
                     st.session_state.chat_histories[company['id']] = [{"role": "assistant", "content": "Hi, I am Miki! Your AI-powered Chief of Staff. Click below to get my analysis of this signal."}]
             st.rerun()
 
-        # --- The Notepad Expander ---
         if st.session_state.active_note_company_id == company['id']:
             _, note_col, _ = st.columns([1, 2, 1])
             with note_col:
@@ -189,24 +172,19 @@ for company in scored_companies:
                         label_visibility="collapsed"
                     )
                     if st.button("Save Note", key=f"save_note_{company['id']}", type="primary"):
-                        # --- MODIFIED SAVE LOGIC ---
                         with conn.session as session:
                             company_to_update = session.query(Company).filter(Company.id == company['id']).first()
                             if company_to_update:
                                 company_to_update.notes = note_content
                                 session.commit()
-                        # --- END OF MODIFICATION ---
-                        st.session_state.active_note_company_id = None # Close notepad on save
+                        st.session_state.active_note_company_id = None
                         st.toast(f"Note for {company['name']} saved!", icon="✅")
                         time.sleep(1)
                         st.rerun()
         
-        # The Chat Expander
         if st.session_state.active_chat_company_id == company['id']:
             latest_signal = company['latest_signal_obj']
-            active_company_obj = session.query(Company).filter(Company.id == company['id']).first()
             active_chat_history = st.session_state.chat_histories[company['id']]
-
             _, chat_col, _ = st.columns([1, 2, 1])
             with chat_col:
                 with st.expander("Chat with Miki", expanded=True):
@@ -254,19 +232,22 @@ for company in scored_companies:
 
         st.markdown("<hr>", unsafe_allow_html=True)
 
-
 # --- Admin Section for Seeding ---
 with st.sidebar:
     st.title("⚙️ Admin Panel")
     admin_password = st.text_input("Enter Admin Password", type="password")
-
-    # Check if the entered password matches the one in secrets
-    if admin_password == st.secrets.get("ADMIN_PASSWORD"):
+    
+    if admin_password and admin_password == st.secrets.get("ADMIN_PASSWORD"):
         st.success("Authenticated")
-        if st.button("SEED DATABASE"):
+        if st.button("SETUP/SEED DATABASE"):
             from data_seeder import seed_initial_data
-            with st.spinner("Populating the database with initial data..."):
+            with st.spinner("Setting up tables and populating data..."):
+                # Create tables from scratch
+                with conn.session as s:
+                    Base.metadata.drop_all(s.bind)
+                    Base.metadata.create_all(s.bind)
+                # Run the seeder function
                 seed_initial_data()
-            st.success("✅ Database seeded successfully!")
-            st.info("You can now remove the admin section from the code.")
+            st.success("✅ Database setup and seeded successfully!")
+            st.info("You can now refresh the page to see the data.")
             st.rerun()
