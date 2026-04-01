@@ -93,7 +93,7 @@ scored_companies = all_scored_companies
 if all_scored_companies:
     industries = sorted(list(set([c['industry'] for c in all_scored_companies])))
     filter_options = ["— Select an Industry to Filter —"] + industries
-    selected_industry = st.selectbox("", options=filter_options, index=0)
+    selected_industry = st.selectbox("Filter by Industry", options=filter_options, index=0, label_visibility="collapsed")
     if selected_industry != "— Select an Industry to Filter —":
         scored_companies = [c for c in all_scored_companies if c['industry'] == selected_industry]
 
