@@ -37,7 +37,17 @@ def seed_initial_data(num_signals=200):
         website = f"https://www.{row['domain']}"
         
         # Ensure LinkedIn URL is a full URL
-        linkedin_url = f"https://{row['linkedin_url']}" if not row['linkedin_url'].startswith('http') else row['linkedin_url']
+        raw_linkedin = row.get('linkedin_url', '')
+        if pd.isna(raw_linkedin) or not raw_linkedin:
+            linkedin_url = ''
+        elif not raw_linkedin.startswith('http'):
+            linkedin_url = f"https://{raw_linkedin}"
+        else:
+            linkedin_url = raw_linkedin
+
+        # Handle NaN ticker_symbol from CSV
+        ticker = row.get('ticker_symbol', '')
+        ticker = '' if pd.isna(ticker) else str(ticker).strip()
 
         company = Company(
             name=row['name'].title(),
@@ -46,7 +56,7 @@ def seed_initial_data(num_signals=200):
             website=website,
             linkedin_url=linkedin_url,
             phone=fake.phone_number(),
-            ticker_symbol=row['ticker_symbol'], # <-- ADD THIS LINE
+            ticker_symbol=ticker if ticker else None,
             notes=""
         )
         
