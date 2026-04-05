@@ -11,7 +11,8 @@ An advanced sales intelligence platform that transforms raw company data into a 
 ## 🚀 Live Demo
 
 **[>> Access the live application here <<](https://ai-buying-signals-dashboard-guovm6evzxexnwxnmxmekh.streamlit.app/)**
-**[>> Access application Video <<](https://ai-buying-signals-dashboard-guovm6evzxexnwxnmxmekh.streamlit.app/)
+**[>> Access application Video <<](https://drive.google.com/drive/folders/1DAzgNx23iL7rtlFxB6bnVauHPMgFdZf_?usp=sharing
+)
 
 
 
