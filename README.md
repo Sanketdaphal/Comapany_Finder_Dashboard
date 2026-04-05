@@ -1,5 +1,5 @@
 # Company Finder Dashboard
-
+![Python](![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg))
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.25%2B-red.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
